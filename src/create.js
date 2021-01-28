@@ -73,7 +73,5 @@ module.exports = async (projectName) => {
     })
     //下载
     const target = await waitLoading(download, 'download template')(repo, tag)
-    console.log('target',target)
-    console.log('path.join(path.resolve(), projectName)', path.join(__dirname, projectName))
-    await ncp(target, path.join(__dirname, projectName))
+    await ncp(target, path.join(path.resolve(), projectName))
 }
