@@ -34,7 +34,6 @@ Reflect.ownKeys(mapActions).forEach((action)=>{
         if(action=='*'){
             console.log(mapActions[action].description)
         }else{
-            console.log(...process.argv.slice(3))
             require(path.resolve(__dirname, action))(...process.argv.slice(3))
         }
     })
