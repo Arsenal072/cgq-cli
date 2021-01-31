@@ -11,12 +11,29 @@ init
 #### 从github上拉取模板
 在gitlab创建组织，并在组织中新建模板, 通过github提供的api, 使用axios.get访问https://api.github.com/orgs/cgq-template/repos，获取组织中所有的包
 #### 遇到的问题
+##### 从github上拉取项目会有需要授权问题
 {
 "message": "API rate limit exceeded for 103.150.130.67. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
 "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"
 }
+##### 解决办法
+https://www.it1352.com/806038.html
 
+The public GitHub API requests are limited to 60 / hour / ip, like you observed. That's why you need authentication.
 
+There are multiple ways to get authenticated when you use the GitHub APIs.
+
+Basic authentication
+Basically, you provide the username and the password.
+
+```
+curl -u Arsenal072 "https://api.github.com/orgs/cgq-cli/repos?state=closed"
+```
+token 9a2afde556979af675d37468dbd6c8c7083d9676
+
+curl -u Arsenal072:9a2afde556979af675d37468dbd6c8c7083d9676 "https://api.github.com/orgs/cgq-cli/repos?state=closed"
+
+curl -u Arsenal072:9a2afde556979af675d37468dbd6c8c7083d9676 "http://api.github.com/repos/cgq-cli/vue-sample-template/tags?state=closed"
 
 
 

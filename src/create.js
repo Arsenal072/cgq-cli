@@ -1,3 +1,4 @@
+const fs = require('fs')
 const path = require('path')
 const axios = require('axios');
 const ora = require('ora');
@@ -12,6 +13,11 @@ ncp = promisify(ncp);
 const {
     downloadDirectory
 } = require('./constant.js')
+const MetalSmith = require('metalsmith')
+let {
+    render
+} = require('consolidate').ejs
+render = promisify(render)
 
 
 const fetchRepoList = async () => {
@@ -21,7 +27,9 @@ const fetchRepoList = async () => {
     return data
 }
 const fetchTagList = async (repo) => {
-    const { data } = await axios.get(`http://api.github.com/repos/cgq-cli/${repo}/tags`)
+    const {
+        data
+    } = await axios.get(`http://api.github.com/repos/cgq-cli/${repo}/tags`)
     return data
 }
 // 加载方法封装，函数柯里化
@@ -40,7 +48,7 @@ const waitLoading = (fn, msg) => async (...args) => {
 
 const download = async (repo, tag) => {
     let api = `cgq-cli/${repo}`
-    if(tag){
+    if (tag) {
         api += `#${tag}`
     }
     const dest = `${downloadDirectory}/${repo}`
@@ -51,6 +59,7 @@ const download = async (repo, tag) => {
 module.exports = async (projectName) => {
     //获取项目模板
     let repos = await waitLoading(fetchRepoList, 'fetching template ...')()
+    console.log('repos', repos)
     repos = repos.map(item => item.name)
     const {
         repo
@@ -73,5 +82,43 @@ module.exports = async (projectName) => {
     })
     //下载
     const target = await waitLoading(download, 'download template')(repo, tag)
-    await ncp(target, path.join(path.resolve(), projectName))
+    //判断临时目录中是否存在ask文件
+    if (!fs.existsSync(path.join(target, 'ask.js'))) {
+        console.log('简单模板')
+        await ncp(target, path.join(path.resolve(), projectName))
+    } else {
+        console.log('复杂模板')
+        await new Promise((resolve, reject) => {
+            MetalSmith(__dirname).source(target).destination(path.resolve(projectName))
+                .use(async (files, metal, down) => {
+                    const args = require(path.join(target, 'ask.js'))
+                    const obj = await inquirer.prompt(args)
+                    const meta = metal.metadata()
+                    Object.assign(meta, obj)
+                    delete files['ask.js']
+                    done()
+                })
+                .use((files, metal, done) => {
+                    const obj = metal.metadata()
+                    Reflect.ownKeys(files).forEach(async (file) => {
+                        if (file.includes('js') || file.includes('json')) {
+                            let content = files[file].contents.toString()
+                            if (content.includes('<%')) {
+                                content = await render(content, obj)
+                                files[file].contents = Buffer.from(content)
+                            }
+                        }
+                    })
+                    done()
+                })
+                .build(err => {
+                    if (err) {
+                        reject()
+                    } else {
+                        resolve()
+                    }
+                })
+            // await ncp(target, path.join(path.resolve(), projectName))
+        })
+    }
 }
