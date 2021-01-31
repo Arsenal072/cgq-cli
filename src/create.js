@@ -88,8 +88,14 @@ module.exports = async (projectName) => {
         await ncp(target, path.join(path.resolve(), projectName))
     } else {
         console.log('复杂模板')
+        // 复杂的需要模版渲染 渲染后在拷贝
+        // 把git上的项目下载下来 如果有ask 文件就是一个复杂的模版,
+        // 我们需要用户选择, 选择后编译模版
+        // 1.让用户填信息
         await new Promise((resolve, reject) => {
-            MetalSmith(__dirname).source(target).destination(path.resolve(projectName))
+            MetalSmith(__dirname) // 如果你传入路径 他默认会遍历当前路径下的src文件夹
+                .source(target)
+                .destination(path.resolve(projectName))
                 .use(async (files, metal, down) => {
                     const args = require(path.join(target, 'ask.js'))
                     const obj = await inquirer.prompt(args)
@@ -99,6 +105,8 @@ module.exports = async (projectName) => {
                     done()
                 })
                 .use((files, metal, done) => {
+                    // 2.让用户天填写的信息去渲染模版
+                    // metalsmith 只要是模版编译 都需要这个模块
                     const obj = metal.metadata()
                     Reflect.ownKeys(files).forEach(async (file) => {
                         if (file.includes('js') || file.includes('json')) {
@@ -109,6 +117,7 @@ module.exports = async (projectName) => {
                             }
                         }
                     })
+                    await ncp(result, path.resolve(projectName));
                     done()
                 })
                 .build(err => {
@@ -118,7 +127,6 @@ module.exports = async (projectName) => {
                         resolve()
                     }
                 })
-            // await ncp(target, path.join(path.resolve(), projectName))
         })
     }
 }
