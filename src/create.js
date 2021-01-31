@@ -92,6 +92,7 @@ module.exports = async (projectName) => {
         // 把git上的项目下载下来 如果有ask 文件就是一个复杂的模版,
         // 我们需要用户选择, 选择后编译模版
         // 1.让用户填信息
+        
         await new Promise((resolve, reject) => {
             MetalSmith(__dirname) // 如果你传入路径 他默认会遍历当前路径下的src文件夹
                 .source(target)
