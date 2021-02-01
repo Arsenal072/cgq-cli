@@ -42,7 +42,6 @@ const waitLoading = (fn, msg) => async (...args) => {
         return result
     } catch {
         spinner.stop()
-        console.log('出错了')
     }
 }
 
@@ -59,7 +58,6 @@ const download = async (repo, tag) => {
 module.exports = async (projectName) => {
     //获取项目模板
     let repos = await waitLoading(fetchRepoList, 'fetching template ...')()
-    console.log('repos', repos)
     repos = repos.map(item => item.name)
     const {
         repo
@@ -84,10 +82,8 @@ module.exports = async (projectName) => {
     const target = await waitLoading(download, 'download template')(repo, tag)
     //判断临时目录中是否存在ask文件
     if (!fs.existsSync(path.join(target, 'ask.js'))) {
-        console.log('简单模板')
         await ncp(target, path.join(path.resolve(), projectName))
     } else {
-        console.log('复杂模板')
         // 复杂的需要模版渲染 渲染后在拷贝
         // 把git上的项目下载下来 如果有ask 文件就是一个复杂的模版,
         // 我们需要用户选择, 选择后编译模版
