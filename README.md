@@ -494,7 +494,7 @@ if (!fs.existsSync(path.join(result, 'ask.js'))) {
 ### 项目发布
 
 ```js
-nrm use npm  // 准备发布包
+npm use npm  // 准备发布包
 npm addUser  // 填写账号密码
 npm publish  // 已经发布成功
 ```

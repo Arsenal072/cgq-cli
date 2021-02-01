@@ -1,6 +1,6 @@
 {
   "name": "cgq-cli",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "这是一个脚手架",
   "main": "index.js",
   "scripts": {

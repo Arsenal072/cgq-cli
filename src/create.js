@@ -97,7 +97,7 @@ module.exports = async (projectName) => {
             MetalSmith(__dirname) // 如果你传入路径 他默认会遍历当前路径下的src文件夹
                 .source(target)
                 .destination(path.resolve(projectName))
-                .use(async (files, metal, down) => {
+                .use(async (files, metal, done) => {
                     const args = require(path.join(target, 'ask.js'))
                     const obj = await inquirer.prompt(args)
                     const meta = metal.metadata()
@@ -118,7 +118,7 @@ module.exports = async (projectName) => {
                             }
                         }
                     })
-                    await ncp(result, path.resolve(projectName));
+                    // await ncp(result, path.resolve(projectName));
                     done()
                 })
                 .build(err => {
